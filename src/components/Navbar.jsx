@@ -14,6 +14,7 @@ export default function Navbar() {
       setUser(currentUser);
       if (currentUser) {
         const docSnap = await getDoc(doc(db, "users", currentUser.uid));
+        
         if (docSnap.exists()) {
           setRole(docSnap.data().role);
         }
