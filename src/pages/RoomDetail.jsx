@@ -14,9 +14,9 @@ import {
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
-// ========================================
-// FIX ICON MẶC ĐỊNH CỦA LEAFLET
-// ========================================
+// =====================================================
+// FIX ICON LEAFLET
+// =====================================================
 
 delete L.Icon.Default.prototype._getIconUrl;
 
@@ -32,21 +32,22 @@ L.Icon.Default.mergeOptions({
 });
 
 
-// ========================================
+// =====================================================
 // ROOM DETAIL
-// ========================================
+// =====================================================
 
 export default function RoomDetail() {
   const { id } = useParams();
+
   const navigate = useNavigate();
 
   const [room, setRoom] = useState(null);
   const [loading, setLoading] = useState(true);
 
 
-  // ========================================
-  // LẤY THÔNG TIN PHÒNG TỪ FIRESTORE
-  // ========================================
+  // ===================================================
+  // LẤY THÔNG TIN PHÒNG
+  // ===================================================
 
   useEffect(() => {
     const fetchRoom = async () => {
@@ -60,48 +61,55 @@ export default function RoomDetail() {
             id: docSnap.id,
             ...docSnap.data(),
           });
+        } else {
+          setRoom(null);
         }
+
       } catch (error) {
         console.error(
           "Lỗi lấy thông tin phòng:",
           error
         );
-      }
 
-      setLoading(false);
+        setRoom(null);
+
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchRoom();
+
   }, [id]);
 
 
-  // ========================================
+  // ===================================================
   // GỌI ĐIỆN
-  // ========================================
+  // ===================================================
 
   const handleCall = () => {
-    if (room?.phone) {
-      window.location.href =
-        "tel:" + room.phone;
-    }
+    if (!room?.phone) return;
+
+    window.location.href =
+      "tel:" + room.phone;
   };
 
 
-  // ========================================
+  // ===================================================
   // GỬI EMAIL
-  // ========================================
+  // ===================================================
 
   const handleEmail = () => {
-    if (room?.userEmail) {
-      window.location.href =
-        "mailto:" + room.userEmail;
-    }
+    if (!room?.userEmail) return;
+
+    window.location.href =
+      "mailto:" + room.userEmail;
   };
 
 
-  // ========================================
+  // ===================================================
   // LOADING
-  // ========================================
+  // ===================================================
 
   if (loading) {
     return (
@@ -118,9 +126,9 @@ export default function RoomDetail() {
   }
 
 
-  // ========================================
+  // ===================================================
   // KHÔNG TÌM THẤY PHÒNG
-  // ========================================
+  // ===================================================
 
   if (!room) {
     return (
@@ -137,35 +145,32 @@ export default function RoomDetail() {
   }
 
 
-  // ========================================
+  // ===================================================
   // KIỂM TRA TỌA ĐỘ
-  // ========================================
+  // ===================================================
+
+  const latitude = Number(room.lat);
+  const longitude = Number(room.lng);
 
   const hasLocation =
-    room.lat !== undefined &&
-    room.lat !== null &&
-    room.lng !== undefined &&
-    room.lng !== null &&
-    !isNaN(Number(room.lat)) &&
-    !isNaN(Number(room.lng));
+    Number.isFinite(latitude) &&
+    Number.isFinite(longitude);
 
 
-  // ========================================
+  // ===================================================
   // GIAO DIỆN
-  // ========================================
+  // ===================================================
 
   return (
     <div className="min-h-screen bg-gray-100">
 
       <Navbar />
 
-
       <div className="max-w-4xl mx-auto px-4 py-8">
 
-
-        {/* ==================================
+        {/* ============================================
             QUAY LẠI
-        ================================== */}
+        ============================================ */}
 
         <button
           onClick={() => navigate(-1)}
@@ -178,9 +183,9 @@ export default function RoomDetail() {
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
 
 
-          {/* ==================================
+          {/* ==========================================
               ẢNH PHÒNG
-          ================================== */}
+          ========================================== */}
 
           <img
             src={
@@ -195,9 +200,9 @@ export default function RoomDetail() {
           <div className="p-6">
 
 
-            {/* ==================================
+            {/* ========================================
                 TIÊU ĐỀ + GIÁ
-            ================================== */}
+            ======================================== */}
 
             <div className="flex justify-between items-start mb-4">
 
@@ -207,7 +212,7 @@ export default function RoomDetail() {
 
               <span className="text-2xl font-bold text-blue-600 ml-4">
                 {room.price
-                  ? Number(room.price).toLocaleString("vi-VN")
+                  ? room.price.toLocaleString("vi-VN")
                   : "0"}{" "}
                 đ/tháng
               </span>
@@ -215,16 +220,17 @@ export default function RoomDetail() {
             </div>
 
 
-            {/* ==================================
+            {/* ========================================
                 THÔNG TIN PHÒNG
-            ================================== */}
+            ======================================== */}
 
             <div className="grid grid-cols-2 gap-4 bg-gray-50 rounded-xl p-4 mb-6">
 
 
-              {/* ĐỊA CHỈ */}
+              {/* Địa chỉ */}
 
               <div>
+
                 <p className="text-sm text-gray-500">
                   Địa chỉ
                 </p>
@@ -232,12 +238,14 @@ export default function RoomDetail() {
                 <p className="font-medium">
                   📍 {room.address}
                 </p>
+
               </div>
 
 
-              {/* DIỆN TÍCH */}
+              {/* Diện tích */}
 
               <div>
+
                 <p className="text-sm text-gray-500">
                   Diện tích
                 </p>
@@ -245,29 +253,35 @@ export default function RoomDetail() {
                 <p className="font-medium">
                   📐 {room.area} m²
                 </p>
+
               </div>
 
 
-              {/* GIÁ */}
+              {/* Giá */}
 
               <div>
+
                 <p className="text-sm text-gray-500">
                   Giá thuê
                 </p>
 
                 <p className="font-medium text-blue-600">
                   💰{" "}
+
                   {room.price
-                    ? Number(room.price).toLocaleString("vi-VN")
+                    ? room.price.toLocaleString("vi-VN")
                     : "0"}{" "}
+
                   đ/tháng
                 </p>
+
               </div>
 
 
-              {/* NGƯỜI ĐĂNG */}
+              {/* Người đăng */}
 
               <div>
+
                 <p className="text-sm text-gray-500">
                   Đăng bởi
                 </p>
@@ -275,16 +289,18 @@ export default function RoomDetail() {
                 <p className="font-medium">
                   👤 {room.userEmail}
                 </p>
+
               </div>
 
             </div>
 
 
-            {/* ==================================
+            {/* ========================================
                 MÔ TẢ
-            ================================== */}
+            ======================================== */}
 
             {room.description && (
+
               <div className="mb-6">
 
                 <h2 className="text-lg font-bold mb-2 text-gray-700">
@@ -296,14 +312,16 @@ export default function RoomDetail() {
                 </p>
 
               </div>
+
             )}
 
 
-            {/* ==================================
+            {/* ========================================
                 BẢN ĐỒ
-            ================================== */}
+            ======================================== */}
 
             {hasLocation && (
+
               <div className="mb-6">
 
                 <h2 className="text-lg font-bold mb-3 text-gray-700">
@@ -311,65 +329,77 @@ export default function RoomDetail() {
                 </h2>
 
 
-                <MapContainer
-                  center={[
-                    Number(room.lat),
-                    Number(room.lng),
-                  ]}
-                  zoom={16}
-                  scrollWheelZoom={true}
+                <div
+                  className="overflow-hidden rounded-xl"
                   style={{
                     height: "300px",
                     width: "100%",
-                    borderRadius: "12px",
-                    overflow: "hidden",
                   }}
                 >
 
-                  {/* ==========================
-                      OPENSTREETMAP
-                  ========================== */}
-
-                  <TileLayer
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  />
-
-
-                  {/* ==========================
-                      MARKER
-                  ========================== */}
-
-                  <Marker
-                    position={[
-                      Number(room.lat),
-                      Number(room.lng),
+                  <MapContainer
+                    center={[
+                      latitude,
+                      longitude,
                     ]}
+                    zoom={16}
+                    scrollWheelZoom={true}
+                    style={{
+                      height: "100%",
+                      width: "100%",
+                    }}
                   >
 
-                    <Popup>
-                      <strong>
-                        {room.title}
-                      </strong>
 
-                      <br />
+                    {/* =================================
+                        BẢN ĐỒ ESRI
+                    ================================= */}
 
-                      {room.address}
-                    </Popup>
+                    <TileLayer
+                      url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"
+                      attribution="&copy; Esri &mdash; Source: Esri, OpenStreetMap contributors"
+                    />
 
-                  </Marker>
 
-                </MapContainer>
+                    {/* =================================
+                        MARKER
+                    ================================= */}
+
+                    <Marker
+                      position={[
+                        latitude,
+                        longitude,
+                      ]}
+                    >
+
+                      <Popup>
+                        <strong>
+                          {room.title}
+                        </strong>
+
+                        <br />
+
+                        {room.address}
+
+                      </Popup>
+
+                    </Marker>
+
+                  </MapContainer>
+
+                </div>
 
               </div>
+
             )}
 
 
-            {/* ==================================
+            {/* ========================================
                 NẾU KHÔNG CÓ TỌA ĐỘ
-            ================================== */}
+            ======================================== */}
 
             {!hasLocation && (
+
               <div className="mb-6">
 
                 <h2 className="text-lg font-bold mb-3 text-gray-700">
@@ -377,16 +407,19 @@ export default function RoomDetail() {
                 </h2>
 
                 <div className="bg-gray-100 rounded-xl p-6 text-center text-gray-500">
-                  Chưa có thông tin vị trí bản đồ.
+
+                  Chưa có thông tin vị trí của phòng.
+
                 </div>
 
               </div>
+
             )}
 
 
-            {/* ==================================
+            {/* ========================================
                 THÔNG TIN LIÊN HỆ
-            ================================== */}
+            ======================================== */}
 
             <div className="bg-blue-50 rounded-xl p-5 border border-blue-100">
 
@@ -396,7 +429,7 @@ export default function RoomDetail() {
               </h2>
 
 
-              {/* SỐ ĐIỆN THOẠI */}
+              {/* Số điện thoại */}
 
               <p className="text-gray-700 mb-1">
 
@@ -404,12 +437,12 @@ export default function RoomDetail() {
                   Số điện thoại:
                 </span>{" "}
 
-                {room.phone || "Chưa cập nhật"}
+                {room.phone}
 
               </p>
 
 
-              {/* EMAIL */}
+              {/* Email */}
 
               <p className="text-gray-700 mb-4">
 
@@ -417,14 +450,14 @@ export default function RoomDetail() {
                   Email:
                 </span>{" "}
 
-                {room.userEmail || "Chưa cập nhật"}
+                {room.userEmail}
 
               </p>
 
 
-              {/* ==================================
-                  CÁC NÚT LIÊN HỆ
-              ================================== */}
+              {/* =====================================
+                  BUTTON
+              ===================================== */}
 
               <div className="flex gap-3">
 
@@ -433,8 +466,7 @@ export default function RoomDetail() {
 
                 <button
                   onClick={handleCall}
-                  disabled={!room.phone}
-                  className="flex-1 bg-blue-600 text-white text-center py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 bg-blue-600 text-white text-center py-3 rounded-lg font-semibold hover:bg-blue-700"
                 >
                   📞 Gọi ngay
                 </button>
@@ -444,8 +476,7 @@ export default function RoomDetail() {
 
                 <button
                   onClick={handleEmail}
-                  disabled={!room.userEmail}
-                  className="flex-1 bg-white border border-blue-600 text-blue-600 text-center py-3 rounded-lg font-semibold hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 bg-white border border-blue-600 text-blue-600 text-center py-3 rounded-lg font-semibold hover:bg-blue-50"
                 >
                   ✉️ Gửi email
                 </button>
