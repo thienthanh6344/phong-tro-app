@@ -147,7 +147,7 @@ export default function Chat() {
         <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
 
           {/* ================= HEADER ================= */}
-          <div className="h-[72px] px-4 sm:px-6 border-b border-gray-200 flex items-center justify-between">
+          <div className="h-18 px-4 sm:px-6 border-b border-gray-200 flex items-center justify-between">
 
             <div className="flex items-center gap-3">
 
@@ -181,7 +181,7 @@ export default function Chat() {
           </div>
 
           {/* ================= MESSAGE AREA ================= */}
-          <div className="h-[560px] overflow-y-auto px-4 sm:px-6 py-5 bg-[#fafafa]">
+          <div className="h-140 overflow-y-auto px-4 sm:px-6 py-5 bg-[#fafafa]">
 
             {messages.length === 0 ? (
               <div className="h-full flex items-center justify-center">
@@ -223,7 +223,7 @@ export default function Chat() {
 
                       {/* Avatar người nhận */}
                       {!isMe && (
-                        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-700 text-white flex items-center justify-center text-xs font-medium">
+                        <div className="-shrink-0 w-8 h-8 rounded-full bg-gray-700 text-white flex items-center justify-center text-xs font-medium">
                           {getInitial(msg.senderEmail)}
                         </div>
                       )}
@@ -267,7 +267,7 @@ export default function Chat() {
 
                       {/* Avatar của mình */}
                       {isMe && (
-                        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-medium">
+                        <div className="shrink-0 w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-medium">
                           {getInitial(currentUser?.email)}
                         </div>
                       )}
