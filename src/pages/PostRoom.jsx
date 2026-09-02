@@ -43,57 +43,30 @@ export default function PostRoom() {
     setError("Vui lòng nhập địa chỉ trước!");
     return;
   }
-
   setGeocoding(true);
   setError("");
-
   try {
-    const params = new URLSearchParams({
-      format: "jsonv2",
-      q: `${form.address}, Việt Nam`,
-      limit: "1",
-      "accept-language": "vi",
-      countrycodes: "vn",
-    });
-
     const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?${params.toString()}`,
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(form.address)}&limit=1&countrycodes=vn`,
       {
-        method: "GET",
         headers: {
-          Accept: "application/json",
-        },
+          "Accept-Language": "vi",
+          "User-Agent": "PhongTroApp/1.0"
+        }
       }
     );
-
-    if (!res.ok) {
-      throw new Error(`Nominatim HTTP ${res.status}`);
-    }
-
     const data = await res.json();
-
-    if (data.length === 0) {
-      setError(
-        "Không tìm thấy địa chỉ. Hãy nhập đầy đủ số nhà, tên đường, quận/huyện và TP.HCM."
-      );
-      return;
+    if (data.length > 0) {
+      setForm({ ...form, lat: data[0].lat, lng: data[0].lon });
+    } else {
+      setError("Không tìm thấy địa chỉ, hãy thử nhập đầy đủ hơn!");
     }
-
-    setForm((prev) => ({
-      ...prev,
-      lat: data[0].lat,
-      lng: data[0].lon,
-    }));
-  } catch (err) {
-    console.error("Geocoding error:", err);
-
-    setError(
-      "Không thể kết nối dịch vụ bản đồ. Bạn có thể nhập Lat/Lng thủ công."
-    );
-  } finally {
-    setGeocoding(false);
+  } catch {
+    setError("Lỗi khi lấy tọa độ, vui lòng thử lại!");
   }
+  setGeocoding(false);
 };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
